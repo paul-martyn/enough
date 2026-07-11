@@ -5,6 +5,8 @@ export interface Task {
   id: string
   title: string
   done: 0 | 1 // stored as number so Dexie can index it
+  /** Category this task belongs to (drives its color). */
+  categoryId: string
   priority: Priority
   /** ISO date (yyyy-mm-dd) or null. */
   dueDate: string | null
@@ -18,6 +20,7 @@ export interface Task {
 /** Fields the UI provides when creating a task; the rest are filled by the repository. */
 export interface NewTask {
   title: string
+  categoryId: string
   priority?: Priority
   dueDate?: string | null
   notes?: string

@@ -1,34 +1,21 @@
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import BottomNav from './shared/BottomNav'
 import Placeholder from './shared/Placeholder'
+import HomePage from './features/home/HomePage'
 import TasksPage from './features/tasks/TasksPage'
 
-const TITLES: Record<string, string> = {
-  '/tasks': 'Задачи',
-  '/notes': 'Идеи',
-  '/finances': 'Финансы',
-}
-
 export default function App() {
-  const { pathname } = useLocation()
-  const title = TITLES[pathname] ?? 'Enough'
-
   return (
-    <div className="mx-auto flex h-full max-w-md flex-col">
-      <header
-        className="sticky top-0 z-10 border-b border-slate-800 bg-slate-900/95 px-4 py-3 text-lg font-semibold backdrop-blur"
-        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.75rem)' }}
-      >
-        {title}
-      </header>
-
-      <main className="flex-1 overflow-y-auto">
+    <div className="mx-auto flex h-full max-w-[480px] flex-col bg-cream shadow-[0_0_60px_rgba(0,0,0,0.08)]">
+      <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <Routes>
-          <Route path="/" element={<Navigate to="/tasks" replace />} />
+          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/home" element={<HomePage />} />
           <Route path="/tasks" element={<TasksPage />} />
-          <Route path="/notes" element={<Placeholder title="Идеи" />} />
-          <Route path="/finances" element={<Placeholder title="Финансы" />} />
-          <Route path="*" element={<Navigate to="/tasks" replace />} />
+          <Route path="/notes" element={<Placeholder title="Заметки" />} />
+          <Route path="/more" element={<Placeholder title="Ещё" />} />
+          <Route path="/extra" element={<Placeholder title="Скоро" />} />
+          <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </main>
 

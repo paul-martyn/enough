@@ -1,5 +1,7 @@
 import Dexie, { type EntityTable } from 'dexie'
 import type { Task } from '../features/tasks/types'
+import type { Category } from '../features/categories/types'
+import { DEFAULT_CATEGORY_ID } from '../features/categories/types'
 
 /**
  * Central Dexie database. Every feature adds its own table here.
@@ -12,9 +14,26 @@ import type { Task } from '../features/tasks/types'
  */
 export const db = new Dexie('enough') as Dexie & {
   tasks: EntityTable<Task, 'id'>
+  categories: EntityTable<Category, 'id'>
 }
 
+// v1: tasks only.
 db.version(1).stores({
-  // Only indexed fields are listed here, not every column.
   tasks: 'id, done, priority, dueDate, updatedAt, deletedAt',
 })
+
+// v2: introduce categories; every task gains a categoryId.
+db.version(2)
+  .stores({
+    tasks: 'id, done, categoryId, priority, dueDate, updatedAt, deletedAt',
+    categories: 'id, order, updatedAt, deletedAt',
+  })
+  .upgrade(async (tx) => {
+    // Assign any pre-existing task to the default category.
+    await tx
+      .table<Task>('tasks')
+      .toCollection()
+      .modify((task) => {
+        if (!task.categoryId) task.categoryId = DEFAULT_CATEGORY_ID
+      })
+  })

@@ -9,9 +9,7 @@ import type { NewTask, Priority, Task } from './types'
 export const TaskRepository = {
   /** All live (non-deleted) tasks, newest first. */
   async list(): Promise<Task[]> {
-    const tasks = await db.tasks
-      .filter((t) => t.deletedAt === null)
-      .toArray()
+    const tasks = await db.tasks.filter((t) => t.deletedAt === null).toArray()
     return tasks.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
   },
 
@@ -21,6 +19,7 @@ export const TaskRepository = {
       id: crypto.randomUUID(),
       title: input.title.trim(),
       done: 0,
+      categoryId: input.categoryId,
       priority: input.priority ?? 'normal',
       dueDate: input.dueDate ?? null,
       notes: input.notes ?? '',
@@ -42,6 +41,10 @@ export const TaskRepository = {
 
   async setPriority(id: string, priority: Priority): Promise<void> {
     await this.update(id, { priority })
+  },
+
+  async setCategory(id: string, categoryId: string): Promise<void> {
+    await this.update(id, { categoryId })
   },
 
   /** Soft delete — kept so a future sync can propagate the removal. */

@@ -1,8 +1,22 @@
 @import 'tailwindcss';
 
-/* Dark, mobile-first base. Respects iOS safe areas via viewport-fit=cover. */
+/* Self-hosted Manrope (works offline in the PWA). */
+@import '@fontsource/manrope/500.css';
+@import '@fontsource/manrope/700.css';
+@import '@fontsource/manrope/800.css';
+
+/* Core palette exposed as Tailwind color utilities: bg-cream, text-ink, bg-cta… */
+@theme {
+  --color-cream: #fbf8f2;
+  --color-ink: #1a1a1a;
+  --color-cta: #ff5fa2;
+  --color-done: #f1efe9;
+  --font-sans:
+    'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html,
@@ -13,14 +27,17 @@ body,
 
 body {
   margin: 0;
-  background: #0b1020;
-  color: #e5e7eb;
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  background: #dedad0; /* behind the phone-width card */
+  color: #1a1a1a;
+  font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
+}
+
+/* Hide scrollbars — the design keeps surfaces clean. */
+::-webkit-scrollbar {
+  display: none;
+}
+* {
+  scrollbar-width: none;
 }
