@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { TaskRepository } from '../tasks/TaskRepository'
 import { useTasks } from '../tasks/useTasks'
 import { useCategories } from '../categories/useCategories'
@@ -52,8 +53,25 @@ export default function HomePage() {
           </div>
           <div className="mt-1 text-sm font-medium text-black/45">{todayLabel}</div>
         </div>
-        <div className="flex h-[52px] w-[52px] flex-none items-center justify-center rounded-full bg-[#ffd23f] text-xl font-extrabold text-ink">
-          {USER_NAME.charAt(0).toUpperCase()}
+        <div className="flex flex-none items-center gap-2">
+          <Link
+            to="/settings"
+            aria-label="Настройки"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-black/5 text-ink active:bg-black/10"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12 15.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z M19.4 13a7.6 7.6 0 000-2l2-1.5-2-3.5-2.4 1a7.6 7.6 0 00-1.7-1l-.4-2.5h-4l-.4 2.5a7.6 7.6 0 00-1.7 1l-2.4-1-2 3.5L4.6 11a7.6 7.6 0 000 2l-2 1.5 2 3.5 2.4-1a7.6 7.6 0 001.7 1l.4 2.5h4l.4-2.5a7.6 7.6 0 001.7-1l2.4 1 2-3.5-2-1.5z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </Link>
+          <div className="flex h-[52px] w-[52px] items-center justify-center rounded-full bg-[#ffd23f] text-xl font-extrabold text-ink">
+            {USER_NAME.charAt(0).toUpperCase()}
+          </div>
         </div>
       </div>
 

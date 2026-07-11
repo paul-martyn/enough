@@ -72,7 +72,7 @@ export default function BottomNav() {
       className="pointer-events-none fixed inset-x-0 z-20 flex justify-center px-4"
       style={{ bottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}
     >
-      <div className="pointer-events-auto flex w-full max-w-[400px] items-center justify-around rounded-full border border-white/50 bg-white/60 px-2 py-2 shadow-lg shadow-black/10 backdrop-blur-2xl supports-[not(backdrop-filter:blur(0))]:bg-white/90">
+      <div className="glass pointer-events-auto flex w-full max-w-[400px] items-center justify-around rounded-full px-2 py-2 shadow-lg shadow-black/10">
         {items.map((item) => (
           <NavLink
             key={item.to}

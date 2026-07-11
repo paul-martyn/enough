@@ -55,7 +55,7 @@ export default function TasksPage() {
   return (
     <div className="flex flex-col">
       {/* Sticky glass header: title + category chips. Content slides under it. */}
-      <div className="sticky top-0 z-10 border-b border-black/5 bg-cream/75 backdrop-blur-xl">
+      <div className="glass sticky top-0 z-10 rounded-none border-x-0 border-t-0">
         <div className="mx-auto w-full max-w-[640px]">
           <div
             className="px-6 pb-2"
@@ -142,7 +142,7 @@ export default function TasksPage() {
         className="pointer-events-none fixed inset-x-0 z-20 flex justify-center px-4"
         style={{ bottom: 'calc(env(safe-area-inset-bottom) + 86px)' }}
       >
-        <div className="pointer-events-auto flex w-full max-w-[400px] items-center gap-2 rounded-full border border-white/50 bg-white/60 p-1.5 pl-5 shadow-lg shadow-black/10 backdrop-blur-2xl supports-[not(backdrop-filter:blur(0))]:bg-white/90">
+        <div className="glass pointer-events-auto flex w-full max-w-[400px] items-center gap-2 rounded-full p-1.5 pl-5 shadow-lg shadow-black/10">
           <input
             value={quick}
             onChange={(e) => setQuick(e.target.value)}

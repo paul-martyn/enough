@@ -15,35 +15,60 @@
     'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* User-tunable UI variables (overridden at runtime by settingsStore). */
 :root {
   color-scheme: light;
-}
-
-html,
-body {
-  height: 100%;
-}
-
-body {
-  margin: 0;
-  background: #fbf8f2; /* full-bleed cream, no frame */
-  color: #1a1a1a;
-  font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  -webkit-tap-highlight-color: transparent;
-  overscroll-behavior: none;
+  --app-bg: #fbf8f2;
+  --glass-opacity: 0.55;
+  --glass-blur: 22px;
+  --app-scale: 1;
 }
 
 /*
- * Fixed shell: kills iOS page-level bounce in standalone PWAs.
- * The ONLY scroll container is <main> inside; it uses
- * overscroll-behavior-y: contain so rubber-banding stays inside the list.
+ * Locked shell: html/body never scroll, so iOS can't rubber-band the whole
+ * viewport (which used to drag the "fixed" bars around).
+ */
+html,
+body {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  margin: 0;
+  overscroll-behavior: none;
+}
+
+body {
+  background: var(--app-bg);
+  color: #1a1a1a;
+  font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/*
+ * #root is the fixed, non-scrolling stage. Bars are positioned absolute inside
+ * it, so they're anchored to something that never moves. `zoom` applies the
+ * user's UI scale to everything at once.
  */
 #root {
   position: fixed;
   inset: 0;
-  display: flex;
-  flex-direction: column;
   overflow: hidden;
+  zoom: var(--app-scale);
+}
+
+/* Liquid-glass surface, driven by the settings variables. */
+.glass {
+  background: rgba(255, 255, 255, var(--glass-opacity));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+@supports not (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
+  .glass {
+    background: rgba(255, 255, 255, 0.92);
+  }
 }
 
 /* Hide scrollbars — the design keeps surfaces clean. */
