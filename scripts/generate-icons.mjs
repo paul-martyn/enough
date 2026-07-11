@@ -2,7 +2,11 @@ import { deflateSync } from 'node:zlib'
 import { writeFileSync, mkdirSync } from 'node:fs'
 
 // Minimal dependency-free PNG generator for placeholder PWA icons.
-// Draws a rounded indigo square with a light check mark. Replace anytime.
+// Draws a rounded dark square with a pink check mark (soft/candy palette).
+// Replace anytime.
+
+const BG = [26, 26, 26] // ink #1a1a1a
+const MARK = [255, 95, 162] // pink #ff5fa2
 
 const CRC_TABLE = (() => {
   const t = new Uint32Array(256)
@@ -95,9 +99,9 @@ function makeDraw(size, maskable) {
       return dx * dx + dy * dy <= t * t
     }
     if (onSeg(0.3, 0.52, 0.45, 0.68) || onSeg(0.45, 0.68, 0.72, 0.34)) {
-      return [255, 255, 255, 255]
+      return [...MARK, 255]
     }
-    return [79, 70, 229, 255] // indigo-600
+    return [...BG, 255]
   }
 }
 
@@ -117,8 +121,8 @@ for (const [file, size, maskable] of targets) {
 
 // SVG favicon (crisp at any size)
 const favicon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" rx="22" fill="#4f46e5"/>
-  <path d="M30 52 L45 68 L72 34" fill="none" stroke="#fff" stroke-width="10"
+  <rect width="100" height="100" rx="22" fill="#1a1a1a"/>
+  <path d="M30 52 L45 68 L72 34" fill="none" stroke="#ff5fa2" stroke-width="10"
     stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 `
