@@ -62,28 +62,47 @@ const items: Item[] = [
   { to: '/extra', label: 'Скоро', icon: icons.dots },
 ]
 
+/**
+ * Floating liquid-glass pill. Content scrolls beneath it and shows through
+ * the backdrop blur. Fixed so it never moves with page scroll.
+ */
 export default function BottomNav() {
   return (
     <nav
-      className="flex flex-none justify-around border-t border-black/5 bg-white px-2 pt-3"
-      style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}
+      className="pointer-events-none fixed inset-x-0 z-20 flex justify-center px-4"
+      style={{ bottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}
     >
-      {items.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          className={({ isActive }) =>
-            `flex flex-col items-center gap-1 ${
-              isActive ? 'text-ink' : 'text-black/35'
-            }`
-          }
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-            {item.icon}
-          </svg>
-          <span className="text-[11px] font-bold">{item.label}</span>
-        </NavLink>
-      ))}
+      <div className="pointer-events-auto flex w-full max-w-[400px] items-center justify-around rounded-full border border-white/50 bg-white/60 px-2 py-2 shadow-lg shadow-black/10 backdrop-blur-2xl supports-[not(backdrop-filter:blur(0))]:bg-white/90">
+        {items.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            aria-label={item.label}
+            className="flex flex-col items-center"
+          >
+            {({ isActive }) => (
+              <>
+                <span
+                  className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
+                    isActive ? 'bg-ink text-white' : 'text-black/40'
+                  }`}
+                >
+                  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+                    {item.icon}
+                  </svg>
+                </span>
+                <span
+                  className={`text-[10px] font-bold leading-tight ${
+                    isActive ? 'text-ink' : 'text-black/40'
+                  }`}
+                >
+                  {item.label}
+                </span>
+              </>
+            )}
+          </NavLink>
+        ))}
+      </div>
     </nav>
   )
 }

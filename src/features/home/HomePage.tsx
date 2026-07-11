@@ -38,8 +38,11 @@ export default function HomePage() {
 
   return (
     <div
-      className="flex flex-1 flex-col gap-[22px] overflow-y-auto px-6 pb-6"
-      style={{ paddingTop: 'calc(env(safe-area-inset-top) + 28px)' }}
+      className="mx-auto flex w-full max-w-[640px] flex-col gap-[22px] px-6"
+      style={{
+        paddingTop: 'calc(env(safe-area-inset-top) + 28px)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom) + 120px)',
+      }}
     >
       {/* Greeting */}
       <div className="flex items-center justify-between">

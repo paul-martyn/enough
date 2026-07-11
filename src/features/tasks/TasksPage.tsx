@@ -53,54 +53,63 @@ export default function TasksPage() {
   })
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      {/* Header */}
-      <div
-        className="flex-none px-6 pb-3"
-        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 28px)' }}
-      >
-        <div className="text-2xl font-extrabold text-ink">Задачи</div>
-      </div>
-
-      {/* Category filter chips */}
-      <div className="flex flex-none gap-2 overflow-x-auto px-6 pb-3">
-        <Chip active={filter === 'all'} onClick={() => setFilter('all')}>
-          Все
-        </Chip>
-        {(categories ?? []).map((c) => (
-          <Chip key={c.id} active={filter === c.id} onClick={() => setFilter(c.id)}>
-            {c.name}
-          </Chip>
-        ))}
-
-        {addingCategory ? (
-          <form onSubmit={submitCategory} className="flex flex-none items-center gap-1.5">
-            <input
-              autoFocus
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-              placeholder="Название"
-              className="w-28 rounded-[14px] border-2 border-black/12 bg-white px-3 py-1.5 text-[13px] font-bold text-ink focus:outline-none"
-            />
-            <button
-              type="submit"
-              className="flex-none rounded-[14px] bg-ink px-3.5 py-1.5 text-[13px] font-bold text-white"
-            >
-              ОК
-            </button>
-          </form>
-        ) : (
-          <button
-            onClick={() => setAddingCategory(true)}
-            className="flex-none whitespace-nowrap rounded-[14px] border-2 border-dashed border-black/25 bg-white px-3.5 py-1.5 text-[13px] font-bold text-black/45"
+    <div className="flex flex-col">
+      {/* Sticky glass header: title + category chips. Content slides under it. */}
+      <div className="sticky top-0 z-10 border-b border-black/5 bg-cream/75 backdrop-blur-xl">
+        <div className="mx-auto w-full max-w-[640px]">
+          <div
+            className="px-6 pb-2"
+            style={{ paddingTop: 'calc(env(safe-area-inset-top) + 20px)' }}
           >
-            + Категория
-          </button>
-        )}
+            <div className="text-2xl font-extrabold text-ink">Задачи</div>
+          </div>
+
+          <div className="flex gap-2 overflow-x-auto px-6 pb-3">
+            <Chip active={filter === 'all'} onClick={() => setFilter('all')}>
+              Все
+            </Chip>
+            {(categories ?? []).map((c) => (
+              <Chip key={c.id} active={filter === c.id} onClick={() => setFilter(c.id)}>
+                {c.name}
+              </Chip>
+            ))}
+
+            {addingCategory ? (
+              <form
+                onSubmit={submitCategory}
+                className="flex flex-none items-center gap-1.5"
+              >
+                <input
+                  autoFocus
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  placeholder="Название"
+                  className="w-28 rounded-[14px] border-2 border-black/12 bg-white px-3 py-1.5 text-[13px] font-bold text-ink focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="flex-none rounded-[14px] bg-ink px-3.5 py-1.5 text-[13px] font-bold text-white"
+                >
+                  ОК
+                </button>
+              </form>
+            ) : (
+              <button
+                onClick={() => setAddingCategory(true)}
+                className="flex-none whitespace-nowrap rounded-[14px] border-2 border-dashed border-black/25 bg-white/70 px-3.5 py-1.5 text-[13px] font-bold text-black/45"
+              >
+                + Категория
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Grouped task list */}
-      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-6 pb-4 pt-1">
+      {/* Grouped task list; bottom padding clears the floating bars. */}
+      <div
+        className="mx-auto flex w-full max-w-[640px] flex-col gap-5 px-6 pt-4"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 190px)' }}
+      >
         {loading && <div className="py-8 text-center text-black/40">Загрузка…</div>}
 
         {!loading &&
@@ -127,24 +136,27 @@ export default function TasksPage() {
           ))}
       </div>
 
-      {/* Persistent quick-add bar (always visible, above the tab bar) */}
+      {/* Floating glass quick-add bar, hovering above the nav pill. */}
       <form
         onSubmit={submitQuick}
-        className="flex flex-none items-center gap-3 border-t border-black/5 bg-cream px-6 py-3"
+        className="pointer-events-none fixed inset-x-0 z-20 flex justify-center px-4"
+        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 86px)' }}
       >
-        <input
-          value={quick}
-          onChange={(e) => setQuick(e.target.value)}
-          placeholder="Новая задача…"
-          className="min-w-0 flex-1 rounded-2xl border-2 border-black/10 bg-white px-4 py-3 text-[15px] font-semibold text-ink placeholder:text-black/35 focus:border-black/25 focus:outline-none"
-        />
-        <button
-          type="submit"
-          aria-label="Добавить задачу"
-          className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-cta text-xl font-extrabold text-ink"
-        >
-          +
-        </button>
+        <div className="pointer-events-auto flex w-full max-w-[400px] items-center gap-2 rounded-full border border-white/50 bg-white/60 p-1.5 pl-5 shadow-lg shadow-black/10 backdrop-blur-2xl supports-[not(backdrop-filter:blur(0))]:bg-white/90">
+          <input
+            value={quick}
+            onChange={(e) => setQuick(e.target.value)}
+            placeholder="Новая задача…"
+            className="min-w-0 flex-1 bg-transparent text-[15px] font-semibold text-ink placeholder:text-black/40 focus:outline-none"
+          />
+          <button
+            type="submit"
+            aria-label="Добавить задачу"
+            className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-cta text-xl font-extrabold text-ink"
+          >
+            +
+          </button>
+        </div>
       </form>
     </div>
   )
@@ -165,7 +177,7 @@ function Chip({
       className={`flex-none whitespace-nowrap rounded-[14px] border-2 px-4 py-1.5 text-[13px] font-bold ${
         active
           ? 'border-ink bg-ink text-white'
-          : 'border-black/12 bg-white text-ink'
+          : 'border-black/12 bg-white/70 text-ink'
       }`}
     >
       {children}

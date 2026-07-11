@@ -4,10 +4,20 @@ import Placeholder from './shared/Placeholder'
 import HomePage from './features/home/HomePage'
 import TasksPage from './features/tasks/TasksPage'
 
+/*
+ * Shell layout:
+ *  - #root is a fixed, non-scrolling shell (see index.css).
+ *  - <main> is the ONLY scroll container; pages add bottom padding so content
+ *    can scroll out from under the floating glass bars.
+ *  - BottomNav floats above <main> (fixed), content shows through its blur.
+ */
 export default function App() {
   return (
-    <div className="mx-auto flex h-full max-w-[480px] flex-col bg-cream shadow-[0_0_60px_rgba(0,0,0,0.08)]">
-      <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <>
+      <main
+        className="min-h-0 flex-1 overflow-y-auto"
+        style={{ overscrollBehaviorY: 'contain' }}
+      >
         <Routes>
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<HomePage />} />
@@ -20,6 +30,6 @@ export default function App() {
       </main>
 
       <BottomNav />
-    </div>
+    </>
   )
 }

@@ -20,18 +20,30 @@
 }
 
 html,
-body,
-#root {
+body {
   height: 100%;
 }
 
 body {
   margin: 0;
-  background: #dedad0; /* behind the phone-width card */
+  background: #fbf8f2; /* full-bleed cream, no frame */
   color: #1a1a1a;
   font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
-  overscroll-behavior-y: none;
+  overscroll-behavior: none;
+}
+
+/*
+ * Fixed shell: kills iOS page-level bounce in standalone PWAs.
+ * The ONLY scroll container is <main> inside; it uses
+ * overscroll-behavior-y: contain so rubber-banding stays inside the list.
+ */
+#root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* Hide scrollbars — the design keeps surfaces clean. */
