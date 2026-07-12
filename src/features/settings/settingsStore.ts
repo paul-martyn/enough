@@ -49,8 +49,10 @@ export function save(patch: Partial<Settings>): void {
   listeners.forEach((cb) => cb(current))
 }
 
+/** Reset appearance only — profile (name/avatar) is kept intentionally. */
 export function reset(): void {
-  save({ ...DEFAULT_SETTINGS })
+  const { background, glassOpacity, glassBlur, scale } = DEFAULT_SETTINGS
+  save({ background, glassOpacity, glassBlur, scale })
 }
 
 export function subscribe(cb: (s: Settings) => void): () => void {

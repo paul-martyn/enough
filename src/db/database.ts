@@ -37,3 +37,18 @@ db.version(2)
         if (!task.categoryId) task.categoryId = DEFAULT_CATEGORY_ID
       })
   })
+
+// v3: tasks gain an "important" flag (starred; shown on the Home screen).
+db.version(3)
+  .stores({
+    tasks: 'id, done, important, categoryId, priority, dueDate, updatedAt, deletedAt',
+    categories: 'id, order, updatedAt, deletedAt',
+  })
+  .upgrade(async (tx) => {
+    await tx
+      .table<Task>('tasks')
+      .toCollection()
+      .modify((task) => {
+        if (task.important !== 0 && task.important !== 1) task.important = 0
+      })
+  })

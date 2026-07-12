@@ -5,6 +5,8 @@ export interface Task {
   id: string
   title: string
   done: 0 | 1 // stored as number so Dexie can index it
+  /** Starred/important flag — important tasks surface on the Home screen. */
+  important: 0 | 1
   /** Category this task belongs to (drives its color). */
   categoryId: string
   priority: Priority

@@ -19,6 +19,7 @@ export const TaskRepository = {
       id: crypto.randomUUID(),
       title: input.title.trim(),
       done: 0,
+      important: 0,
       categoryId: input.categoryId,
       priority: input.priority ?? 'normal',
       dueDate: input.dueDate ?? null,
@@ -45,6 +46,10 @@ export const TaskRepository = {
 
   async setCategory(id: string, categoryId: string): Promise<void> {
     await this.update(id, { categoryId })
+  },
+
+  async toggleImportant(id: string, important: boolean): Promise<void> {
+    await this.update(id, { important: important ? 1 : 0 })
   },
 
   /** Soft delete — kept so a future sync can propagate the removal. */

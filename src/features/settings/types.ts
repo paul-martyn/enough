@@ -7,6 +7,10 @@ export interface Settings {
   glassBlur: number
   /** UI zoom 0.85–1.20. */
   scale: number
+  /** Display name of this assistant/vault, shown on the Home header. */
+  assistantName: string
+  /** Small square avatar as a data URL (canvas-resized), or null. */
+  avatarDataUrl: string | null
 }
 
 export const BACKGROUND_PRESETS: ReadonlyArray<{ name: string; value: string }> = [
@@ -29,4 +33,6 @@ export const DEFAULT_SETTINGS: Settings = {
   glassOpacity: 0.55,
   glassBlur: 22,
   scale: 1,
+  assistantName: 'enough',
+  avatarDataUrl: null,
 }

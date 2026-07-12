@@ -1,5 +1,7 @@
 import { NavLink } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import type { ReactNode } from 'react'
+import { spring } from './motion'
 
 type Item = { to: string; label: string; icon: ReactNode }
 
@@ -63,36 +65,48 @@ const items: Item[] = [
 ]
 
 /**
- * Floating liquid-glass pill. Content scrolls beneath it and shows through
- * the backdrop blur. Fixed so it never moves with page scroll.
+ * Floating liquid-glass bar (squared corners). The active tab gets a soft
+ * colored glow UNDER the glass (layoutId animates it between tabs) plus a
+ * springy icon scale.
  */
 export default function BottomNav() {
   return (
     <nav
       className="pointer-events-none fixed inset-x-0 z-20 flex justify-center px-4"
-      style={{ bottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}
+      style={{ bottom: 'calc(env(safe-area-inset-bottom) + 6px)' }}
     >
-      <div className="glass pointer-events-auto flex w-full max-w-[400px] items-center justify-around rounded-full px-2 py-2 shadow-lg shadow-black/10">
+      <div className="glass pointer-events-auto flex w-full max-w-[420px] items-center justify-around rounded-[22px] px-2 py-2.5 shadow-lg shadow-black/10">
         {items.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             aria-label={item.label}
-            className="flex flex-col items-center"
+            className="relative flex flex-col items-center px-2"
           >
             {({ isActive }) => (
               <>
-                <span
-                  className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
+                {isActive && (
+                  <motion.span
+                    layoutId="tab-glow"
+                    transition={spring}
+                    aria-hidden="true"
+                    className="absolute -top-1 h-12 w-12 rounded-full bg-cta/30 blur-md"
+                  />
+                )}
+                <motion.span
+                  animate={{ scale: isActive ? 1.12 : 1 }}
+                  whileTap={{ scale: 0.88 }}
+                  transition={spring}
+                  className={`relative flex h-11 w-11 items-center justify-center rounded-2xl ${
                     isActive ? 'bg-ink text-white' : 'text-black/40'
                   }`}
                 >
-                  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+                  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
                     {item.icon}
                   </svg>
-                </span>
+                </motion.span>
                 <span
-                  className={`text-[10px] font-bold leading-tight ${
+                  className={`relative mt-0.5 text-[11px] font-bold leading-tight ${
                     isActive ? 'text-ink' : 'text-black/40'
                   }`}
                 >

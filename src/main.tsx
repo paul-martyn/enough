@@ -1,4 +1,3 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { HashRouter } from 'react-router-dom'
 import App from './App.tsx'
@@ -28,10 +27,10 @@ document.addEventListener(
   { passive: false },
 )
 
+// NOTE: StrictMode is intentionally off — its double-mount breaks
+// AnimatePresence exit animations (framer-motion), freezing route changes.
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <HashRouter>
-      <App />
-    </HashRouter>
-  </StrictMode>,
+  <HashRouter>
+    <App />
+  </HashRouter>,
 )
