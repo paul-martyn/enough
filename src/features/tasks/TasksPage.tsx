@@ -9,7 +9,7 @@ import { DEFAULT_CATEGORY_ID } from '../categories/types'
 import type { Category } from '../categories/types'
 import { categoryColor } from '../../shared/theme'
 import ConfirmDialog from '../../shared/ConfirmDialog'
-import { spring, tap } from '../../shared/motion'
+import { softSpring, spring, tap } from '../../shared/motion'
 
 type Filter = 'all' | string // 'all' or a categoryId
 
@@ -47,6 +47,11 @@ export default function TasksPage() {
     setAddingCategory(false)
   }
 
+  function closeCategory() {
+    setNewCategory('')
+    setAddingCategory(false)
+  }
+
   async function openDelete(category: Category) {
     setDeletingCount(await CategoryRepository.liveTaskCount(category.id))
     setDeleting(category)
@@ -59,14 +64,22 @@ export default function TasksPage() {
     setDeleting(null)
   }
 
-  // Swipe between categories: 'all' → cat1 → cat2 → …
+  // Swipe/tap between categories: 'all' → cat1 → cat2 → …
   const order: Filter[] = ['all', ...(categories ?? []).map((c) => c.id)]
+  // Single entry point for changing category: sets the slide direction from the
+  // index delta so both swipes and chip taps animate consistently.
+  function goToFilter(next: Filter) {
+    if (next === filter) return
+    const from = order.indexOf(filter)
+    const to = order.indexOf(next)
+    setSlideDir(to > from ? 1 : -1)
+    setFilter(next)
+  }
   function shiftFilter(step: 1 | -1) {
     const idx = order.indexOf(filter)
     const next = idx + step
     if (next < 0 || next >= order.length) return
-    setSlideDir(step)
-    setFilter(order[next])
+    goToFilter(order[next])
   }
 
   const visibleCats = (categories ?? []).filter(
@@ -96,7 +109,7 @@ export default function TasksPage() {
               scroll under it and get blurred by its glass. */}
           <div className="relative">
             <div className="flex gap-2 overflow-x-auto px-6 pb-4 pr-[76px]">
-              <Chip active={filter === 'all'} onClick={() => setFilter('all')}>
+              <Chip active={filter === 'all'} onClick={() => goToFilter('all')}>
                 Все
               </Chip>
               {(categories ?? []).map((c) => (
@@ -104,7 +117,7 @@ export default function TasksPage() {
                   key={c.id}
                   category={c}
                   active={filter === c.id}
-                  onSelect={() => setFilter(c.id)}
+                  onSelect={() => goToFilter(c.id)}
                   onLongPress={
                     c.id === DEFAULT_CATEGORY_ID ? undefined : () => void openDelete(c)
                   }
@@ -120,39 +133,6 @@ export default function TasksPage() {
             >
               +
             </motion.button>
-
-            {/* Add-category input slides over the chips row */}
-            {addingCategory && (
-                <motion.form
-                  onSubmit={submitCategory}
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0, transition: spring }}
-                  className="glass absolute inset-x-0 top-0 z-20 flex items-center gap-2 rounded-none border-x-0 px-6 py-2"
-                >
-                  <input
-                    autoFocus
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    placeholder="Название категории"
-                    className="min-w-0 flex-1 rounded-xl border-2 border-black/10 bg-white px-4 py-2 text-[15px] font-bold text-ink focus:outline-none"
-                  />
-                  <motion.button
-                    whileTap={tap}
-                    type="submit"
-                    className="flex-none rounded-xl bg-ink px-4 py-2 text-[14px] font-bold text-white"
-                  >
-                    ОК
-                  </motion.button>
-                  <motion.button
-                    whileTap={tap}
-                    type="button"
-                    onClick={() => setAddingCategory(false)}
-                    className="flex-none rounded-xl px-2 py-2 text-[14px] font-bold text-black/50"
-                  >
-                    ✕
-                  </motion.button>
-                </motion.form>
-              )}
           </div>
         </div>
       </div>
@@ -161,7 +141,7 @@ export default function TasksPage() {
       <motion.div
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.2}
+        dragElastic={0.12}
         dragDirectionLock
         dragMomentum={false}
         onDragEnd={(_, info) => {
@@ -231,7 +211,7 @@ export default function TasksPage() {
         className="pointer-events-none fixed inset-x-0 z-20 flex justify-center px-4"
         style={{ bottom: 'calc(env(safe-area-inset-bottom) + 88px)' }}
       >
-        <div className="glass pointer-events-auto flex w-full max-w-[400px] items-center gap-2 rounded-[22px] p-2 pl-5 shadow-lg shadow-black/10">
+        <div className="quick-add-enter glass pointer-events-auto flex w-full max-w-[400px] items-center gap-2 rounded-[22px] p-2 pl-5 shadow-lg shadow-black/10">
           <input
             value={quick}
             onChange={(e) => setQuick(e.target.value)}
@@ -282,6 +262,50 @@ export default function TasksPage() {
         }
         onCancel={() => setDeleting(null)}
       />
+
+      {/* Compact centered "new category" modal */}
+      {addingCategory && (
+        <motion.div
+          className="fixed inset-0 z-40 flex items-center justify-center bg-black/35 px-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onClick={closeCategory}
+        >
+          <motion.form
+            onSubmit={submitCategory}
+            className="w-full max-w-[340px] rounded-2xl bg-white p-5 shadow-xl shadow-black/20"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1, transition: softSpring }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-[17px] font-extrabold text-ink">Новая категория</div>
+            <input
+              autoFocus
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              placeholder="Название категории"
+              className="mt-4 w-full rounded-xl border-2 border-black/10 bg-white px-4 py-3 text-[15px] font-bold text-ink focus:border-ink focus:outline-none"
+            />
+            <div className="mt-4 flex flex-col gap-2">
+              <motion.button
+                whileTap={tap}
+                type="submit"
+                className="rounded-xl bg-ink px-4 py-3 text-[15px] font-bold text-white"
+              >
+                Добавить
+              </motion.button>
+              <motion.button
+                whileTap={tap}
+                type="button"
+                onClick={closeCategory}
+                className="rounded-xl px-4 py-3 text-[15px] font-bold text-black/50"
+              >
+                Отмена
+              </motion.button>
+            </div>
+          </motion.form>
+        </motion.div>
+      )}
     </div>
   )
 }

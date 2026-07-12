@@ -90,11 +90,11 @@ export default function BottomNav() {
                     layoutId="tab-glow"
                     transition={spring}
                     aria-hidden="true"
-                    className="absolute -top-1 h-12 w-12 rounded-full bg-cta/30 blur-md"
+                    className="absolute -top-2 h-16 w-16 rounded-full bg-cta/60 blur-lg"
                   />
                 )}
                 <motion.span
-                  animate={{ scale: isActive ? 1.12 : 1 }}
+                  animate={{ scale: isActive ? 1.2 : 1 }}
                   whileTap={{ scale: 0.88 }}
                   transition={spring}
                   className={`relative flex h-11 w-11 items-center justify-center rounded-2xl ${

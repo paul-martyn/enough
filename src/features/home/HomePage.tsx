@@ -119,20 +119,12 @@ export default function HomePage() {
       </form>
 
       {/* Stats */}
-      <div className="flex gap-3">
-        <div className="flex-1 rounded-2xl bg-[#8ee6b0] p-5">
-          <div className="text-[32px] font-bold leading-none text-ink">
-            {loading ? '—' : `${doneToday}/${total}`}
-          </div>
-          <div className="mt-2 text-[13px] font-semibold text-black/60">
-            Сегодня выполнено
-          </div>
+      <div className="rounded-2xl bg-[#8ee6b0] p-5">
+        <div className="text-[32px] font-bold leading-none text-ink">
+          {loading ? '—' : `${doneToday}/${total}`}
         </div>
-        <div className="flex-1 rounded-2xl bg-[#b7c9ff] p-5">
-          <div className="text-[32px] font-bold leading-none text-ink">
-            {loading ? '—' : categories.length}
-          </div>
-          <div className="mt-2 text-[13px] font-semibold text-black/60">Категории</div>
+        <div className="mt-2 text-[13px] font-semibold text-black/60">
+          Сегодня выполнено
         </div>
       </div>
 

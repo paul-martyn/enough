@@ -71,6 +71,29 @@ body {
   }
 }
 
+/*
+ * Quick-add bar entrance: a short hold, then a smooth rise-in. Driven by the
+ * CSS compositor (not JS/rAF), so it always completes to the visible state and
+ * the field can never get stuck hidden even if animations are throttled.
+ */
+@keyframes quick-add-in {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  22% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.quick-add-enter {
+  animation: quick-add-in 0.55s ease-out forwards;
+}
+
 /* Hide scrollbars — the design keeps surfaces clean. */
 ::-webkit-scrollbar {
   display: none;
