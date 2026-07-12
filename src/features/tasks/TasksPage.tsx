@@ -9,7 +9,8 @@ import { DEFAULT_CATEGORY_ID } from '../categories/types'
 import type { Category } from '../categories/types'
 import { categoryColor } from '../../shared/theme'
 import ConfirmDialog from '../../shared/ConfirmDialog'
-import { softSpring, spring, tap } from '../../shared/motion'
+import { Button, Chip, Dialog, EmptyState, Eyebrow, QuickAddBar, TextInput } from '../../shared/ui'
+import { spring, tap } from '../../shared/motion'
 
 type Filter = 'all' | string // 'all' or a categoryId
 
@@ -18,7 +19,6 @@ export default function TasksPage() {
   const categories = useCategories()
   const [filter, setFilter] = useState<Filter>('all')
   const [slideDir, setSlideDir] = useState(0) // -1 left, 1 right (for swipe slide)
-  const [quick, setQuick] = useState('')
   const [addingCategory, setAddingCategory] = useState(false)
   const [newCategory, setNewCategory] = useState('')
   const [deleting, setDeleting] = useState<Category | null>(null)
@@ -29,13 +29,11 @@ export default function TasksPage() {
     categories?.findIndex((c) => c.id === categoryId) ?? 0
 
   const targetCategory = filter === 'all' ? DEFAULT_CATEGORY_ID : filter
+  const activeCategoryName =
+    filter === 'all' ? null : (categories ?? []).find((c) => c.id === filter)?.name
 
-  async function submitQuick(e: React.FormEvent) {
-    e.preventDefault()
-    const title = quick.trim()
-    if (!title) return
+  async function submitQuick(title: string) {
     await TaskRepository.add({ title, categoryId: targetCategory })
-    setQuick('')
   }
 
   async function submitCategory(e: React.FormEvent) {
@@ -90,49 +88,53 @@ export default function TasksPage() {
     const catTasks = (tasks ?? []).filter((t) => t.categoryId === c.id)
     const undone = catTasks.filter((t) => t.done === 0)
     const done = catTasks.filter((t) => t.done === 1)
-    return { category: c, tasks: [...undone, ...done] }
+    return { category: c, tasks: [...undone, ...done], undoneCount: undone.length }
   })
 
   return (
     <div className="flex flex-col">
-      {/* Sticky glass header: title + category chips. Content slides under it. */}
-      <div className="glass sticky top-0 z-10 rounded-none border-x-0 border-t-0">
+      {/* Sticky solid header: title + category chips over the page background. */}
+      <div
+        className="sticky top-0 z-10 border-b border-hairline"
+        style={{ background: 'var(--app-bg)' }}
+      >
         <div className="mx-auto w-full max-w-[640px]">
           <div
-            className="px-6 pb-3.5"
-            style={{ paddingTop: 'calc(env(safe-area-inset-top) + 24px)' }}
+            className="px-5 pb-2"
+            style={{ paddingTop: 'calc(env(safe-area-inset-top) + 16px)' }}
           >
-            <div className="text-[28px] font-extrabold text-ink">Задачи</div>
+            <h1 className="t-display text-ink">Задачи</h1>
           </div>
 
-          {/* Chips row; the "+" button is pinned at the right edge, chips
-              scroll under it and get blurred by its glass. */}
-          <div className="relative">
-            <div className="flex gap-2 overflow-x-auto px-6 pb-4 pr-[76px]">
-              <Chip active={filter === 'all'} onClick={() => goToFilter('all')}>
-                Все
-              </Chip>
-              {(categories ?? []).map((c) => (
-                <CategoryChip
-                  key={c.id}
-                  category={c}
-                  active={filter === c.id}
-                  onSelect={() => goToFilter(c.id)}
-                  onLongPress={
-                    c.id === DEFAULT_CATEGORY_ID ? undefined : () => void openDelete(c)
-                  }
+          {/* Chips row; «Новая» lives inline at the end — no overlays. */}
+          <div className="flex gap-2 overflow-x-auto px-5 pb-3">
+            <Chip active={filter === 'all'} onClick={() => goToFilter('all')}>
+              Все
+            </Chip>
+            {(categories ?? []).map((c, i) => (
+              <CategoryChip
+                key={c.id}
+                category={c}
+                dot={categoryColor(i)}
+                active={filter === c.id}
+                onSelect={() => goToFilter(c.id)}
+                onLongPress={
+                  c.id === DEFAULT_CATEGORY_ID ? undefined : () => void openDelete(c)
+                }
+              />
+            ))}
+            <Chip onClick={() => setAddingCategory(true)} aria-label="Новая категория">
+              <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+                <path
+                  d="M7 2v10 M2 7h10"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
                 />
-              ))}
-            </div>
-
-            <motion.button
-              whileTap={tap}
-              onClick={() => setAddingCategory(true)}
-              aria-label="Новая категория"
-              className="glass absolute right-4 top-0 z-10 flex h-11 w-11 items-center justify-center rounded-xl text-xl font-extrabold text-ink"
-            >
-              +
-            </motion.button>
+              </svg>
+              Новая
+            </Chip>
           </div>
         </div>
       </div>
@@ -155,32 +157,46 @@ export default function TasksPage() {
           key={filter}
           initial={{ opacity: 0, x: slideDir * 48 }}
           animate={{ opacity: 1, x: 0, transition: spring }}
-          className="mx-auto flex w-full max-w-[640px] flex-col gap-7 px-6 pt-6"
+          className="mx-auto flex w-full max-w-[640px] flex-col gap-8 px-5 pt-6"
           style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 200px)' }}
         >
           {loading && (
-            <div className="py-8 text-center text-black/40">Загрузка…</div>
+            <div className="py-8 text-center t-body text-muted">Загрузка…</div>
           )}
 
           {!loading &&
-            groups.map(({ category, tasks: rows }) => (
-              <div key={category.id}>
-                <div className="mb-3 flex items-center justify-between">
-                  <div className="text-[14px] font-bold tracking-wide text-black/45">
-                    {category.name.toUpperCase()}
-                  </div>
-                  {category.id !== DEFAULT_CATEGORY_ID && (
-                    <motion.button
-                      whileTap={tap}
-                      aria-label={`Действия с категорией ${category.name}`}
-                      onClick={() => void openDelete(category)}
-                      className="px-2 text-[18px] font-bold leading-none text-black/35"
-                    >
-                      ⋯
-                    </motion.button>
-                  )}
-                </div>
-                <div className="flex flex-col gap-2.5">
+            groups.map(({ category, tasks: rows, undoneCount }) => (
+              <section key={category.id}>
+                <Eyebrow
+                  right={
+                    <div className="flex items-center gap-1">
+                      <span className="t-caption tnum text-faint">
+                        {undoneCount > 0 ? undoneCount : ''}
+                      </span>
+                      {category.id !== DEFAULT_CATEGORY_ID && (
+                        <motion.button
+                          whileTap={tap}
+                          aria-label={`Действия с категорией ${category.name}`}
+                          onClick={() => void openDelete(category)}
+                          className="-my-2 flex h-11 w-11 items-center justify-center rounded-ctl text-muted"
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M6 12h.01M12 12h.01M18 12h.01"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.6"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                        </motion.button>
+                      )}
+                    </div>
+                  }
+                >
+                  {category.name}
+                </Eyebrow>
+                <div className="flex flex-col gap-2">
                   {rows.map((task) => (
                     <motion.div
                       key={task.id}
@@ -195,39 +211,27 @@ export default function TasksPage() {
                     </motion.div>
                   ))}
                   {rows.length === 0 && (
-                    <div className="px-0.5 py-1 text-[14px] font-semibold text-black/35">
-                      Пока нет задач
-                    </div>
+                    <EmptyState>Пока пусто — добавьте задачу в строке ниже.</EmptyState>
                   )}
                 </div>
-              </div>
+              </section>
             ))}
         </motion.div>
       </motion.div>
 
-      {/* Floating glass quick-add bar, hovering above the nav bar. */}
-      <form
-        onSubmit={submitQuick}
+      {/* Floating frost quick-add bar, hovering above the nav bar. */}
+      <div
         className="pointer-events-none fixed inset-x-0 z-20 flex justify-center px-4"
-        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 88px)' }}
+        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 84px)' }}
       >
-        <div className="quick-add-enter glass pointer-events-auto flex w-full max-w-[400px] items-center gap-2 rounded-[22px] p-2 pl-5 shadow-lg shadow-black/10">
-          <input
-            value={quick}
-            onChange={(e) => setQuick(e.target.value)}
-            placeholder="Новая задача…"
-            className="min-w-0 flex-1 bg-transparent text-[16px] font-semibold text-ink placeholder:text-black/40 focus:outline-none"
-          />
-          <motion.button
-            whileTap={tap}
-            type="submit"
-            aria-label="Добавить задачу"
-            className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-cta text-2xl font-extrabold text-ink"
-          >
-            +
-          </motion.button>
-        </div>
-      </form>
+        <QuickAddBar
+          placeholder={
+            activeCategoryName ? `В «${activeCategoryName}»…` : 'Новая задача…'
+          }
+          onSubmit={(title) => void submitQuick(title)}
+          className="quick-add-enter frost pointer-events-auto w-full max-w-[400px]"
+        />
+      </div>
 
       {/* Category delete confirmation */}
       <ConfirmDialog
@@ -263,49 +267,26 @@ export default function TasksPage() {
         onCancel={() => setDeleting(null)}
       />
 
-      {/* Compact centered "new category" modal */}
-      {addingCategory && (
-        <motion.div
-          className="fixed inset-0 z-40 flex items-center justify-center bg-black/35 px-8"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          onClick={closeCategory}
-        >
-          <motion.form
-            onSubmit={submitCategory}
-            className="w-full max-w-[340px] rounded-2xl bg-white p-5 shadow-xl shadow-black/20"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1, transition: softSpring }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="text-[17px] font-extrabold text-ink">Новая категория</div>
-            <input
-              autoFocus
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-              placeholder="Название категории"
-              className="mt-4 w-full rounded-xl border-2 border-black/10 bg-white px-4 py-3 text-[15px] font-bold text-ink focus:border-ink focus:outline-none"
-            />
-            <div className="mt-4 flex flex-col gap-2">
-              <motion.button
-                whileTap={tap}
-                type="submit"
-                className="rounded-xl bg-ink px-4 py-3 text-[15px] font-bold text-white"
-              >
-                Добавить
-              </motion.button>
-              <motion.button
-                whileTap={tap}
-                type="button"
-                onClick={closeCategory}
-                className="rounded-xl px-4 py-3 text-[15px] font-bold text-black/50"
-              >
-                Отмена
-              </motion.button>
-            </div>
-          </motion.form>
-        </motion.div>
-      )}
+      {/* Compact centered "new category" dialog */}
+      <Dialog open={addingCategory} title="Новая категория" onClose={closeCategory}>
+        <form onSubmit={submitCategory}>
+          <TextInput
+            autoFocus
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            placeholder="Название категории"
+            className="mt-4"
+          />
+          <div className="mt-4 flex flex-col gap-2">
+            <Button variant="primary" type="submit">
+              Добавить
+            </Button>
+            <Button variant="ghost" type="button" onClick={closeCategory}>
+              Отмена
+            </Button>
+          </div>
+        </form>
+      </Dialog>
     </div>
   )
 }
@@ -318,36 +299,16 @@ function taskWord(n: number): string {
   return 'задач'
 }
 
-function Chip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean
-  onClick: () => void
-  children: React.ReactNode
-}) {
-  return (
-    <motion.button
-      whileTap={tap}
-      onClick={onClick}
-      className={`flex-none whitespace-nowrap rounded-xl border-2 px-4 py-2 text-[14px] font-bold ${
-        active ? 'border-ink bg-ink text-white' : 'border-black/12 bg-white/70 text-ink'
-      }`}
-    >
-      {children}
-    </motion.button>
-  )
-}
-
 /** Chip with long-press (500ms) opening the delete dialog. */
 function CategoryChip({
   category,
+  dot,
   active,
   onSelect,
   onLongPress,
 }: {
   category: Category
+  dot: string
   active: boolean
   onSelect: () => void
   onLongPress?: () => void
@@ -369,8 +330,9 @@ function CategoryChip({
   }
 
   return (
-    <motion.button
-      whileTap={tap}
+    <Chip
+      active={active}
+      dot={dot}
       onPointerDown={start}
       onPointerUp={cancel}
       onPointerLeave={cancel}
@@ -379,12 +341,9 @@ function CategoryChip({
       onClick={() => {
         if (!fired.current) onSelect()
       }}
-      className={`flex-none whitespace-nowrap rounded-xl border-2 px-4 py-2 text-[14px] font-bold ${
-        active ? 'border-ink bg-ink text-white' : 'border-black/12 bg-white/70 text-ink'
-      }`}
       style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
     >
       {category.name}
-    </motion.button>
+    </Chip>
   )
 }

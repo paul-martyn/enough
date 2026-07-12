@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import { HashRouter } from 'react-router-dom'
+import { MotionConfig } from 'framer-motion'
 import App from './App.tsx'
 import { CategoryRepository } from './features/categories/CategoryRepository'
 import { apply, load } from './features/settings/settingsStore'
@@ -31,6 +32,9 @@ document.addEventListener(
 // AnimatePresence exit animations (framer-motion), freezing route changes.
 createRoot(document.getElementById('root')!).render(
   <HashRouter>
-    <App />
+    {/* Respect the OS "reduce motion" preference across all framer animations. */}
+    <MotionConfig reducedMotion="user">
+      <App />
+    </MotionConfig>
   </HashRouter>,
 )

@@ -1,26 +1,33 @@
-// Design tokens for the "soft / candy" style (see Design Style Guide).
-// Core colors also live as CSS variables in index.css (Tailwind @theme) so they
-// can be used as classes (bg-cream, text-ink, bg-cta). Category colors are
+// Design tokens for the "warm paper & ink" system.
+// Core colors live as CSS variables in index.css (Tailwind @theme) and are
+// used as classes (bg-paper, text-ink, bg-accent…). Category colors are
 // dynamic, so they live here and are applied via inline styles.
 
 export const COLORS = {
-  bgOutside: '#dedad0', // behind the phone-width card on desktop
-  cream: '#fbf8f2', // app background
-  ink: '#1a1a1a', // text / dark buttons
-  cta: '#ff5fa2', // pink accent — the "+" action
-  done: '#f1efe9', // completed task background
+  paper: '#f7f4ee', // app background (warm paper)
+  surface: '#ffffff', // cards
+  ink: '#241f18', // warm ink text
+  muted: '#6b6257', // secondary text (AA on surface/paper)
+  accent: '#2f6d4f', // fir/sage green — progress, checks, active states
+  danger: '#c64b3c',
 } as const
 
-// Pastel palette assigned to categories, cycled for new ones.
-export const CATEGORY_PALETTE = [
-  '#ffd23f', // yellow
-  '#ff9a7a', // peach
-  '#8ee6b0', // green
-  '#b7c9ff', // blue
-  '#ff8fd0', // pink
-  '#c9b8ff', // lilac
-] as const
+// Muted warm identity pairs assigned to categories, cycled for new ones.
+// `solid` marks the category (left rail on task cards, dot in chips);
+// `tint` is its quiet background where one is needed.
+export const CATEGORY_COLORS: ReadonlyArray<{ solid: string; tint: string }> = [
+  { solid: '#a8761f', tint: '#f3e9d3' }, // охра
+  { solid: '#b05a3c', tint: '#f4e4db' }, // глина
+  { solid: '#4e7a54', tint: '#e4eddf' }, // шалфей
+  { solid: '#4a6fa5', tint: '#e2e9f2' }, // пыльно-синий
+  { solid: '#a05468', tint: '#f4e3e7' }, // розовое дерево
+  { solid: '#71618f', tint: '#eae5f0' }, // фиалка
+]
 
 export function categoryColor(index: number): string {
-  return CATEGORY_PALETTE[index % CATEGORY_PALETTE.length]
+  return CATEGORY_COLORS[((index % CATEGORY_COLORS.length) + CATEGORY_COLORS.length) % CATEGORY_COLORS.length].solid
+}
+
+export function categoryTint(index: number): string {
+  return CATEGORY_COLORS[((index % CATEGORY_COLORS.length) + CATEGORY_COLORS.length) % CATEGORY_COLORS.length].tint
 }

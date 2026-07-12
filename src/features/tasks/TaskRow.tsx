@@ -6,9 +6,10 @@ import ConfirmDialog from '../../shared/ConfirmDialog'
 import type { Task } from './types'
 
 /**
- * A single task card: checkbox — title — star — delete. Deleting is an explicit
- * button + confirmation (no swipe), so the card no longer captures horizontal
- * gestures and the category swiper behind it works even over a task.
+ * A single task card: checkbox — title — star — delete. The category shows as
+ * a 3px rail on the left edge; the card itself stays a calm white surface.
+ * Every control is a ≥44px touch target. No horizontal gestures — the
+ * category swiper behind the list owns those.
  */
 export default function TaskRow({ task, color }: { task: Task; color: string }) {
   const isDone = task.done === 1
@@ -17,61 +18,85 @@ export default function TaskRow({ task, color }: { task: Task; color: string }) 
 
   return (
     <div className="relative">
-      {/* The card itself */}
-      <div
-        className="relative flex items-center gap-3 rounded-2xl px-4 py-4"
-        style={{
-          background: isDone ? '#f1efe9' : color,
-          opacity: isDone ? 0.55 : 1,
-        }}
-      >
+      <div className="relative flex items-center gap-1 overflow-hidden rounded-card border border-hairline bg-surface py-1.5 pl-3 pr-1 shadow-e1">
+        {/* Category rail */}
+        <span
+          aria-hidden="true"
+          className="absolute inset-y-0 left-0 w-[3px]"
+          style={{ background: color, opacity: isDone ? 0.35 : 1 }}
+        />
+
+        {/* Checkbox: 24px visible box in a 44px target */}
         <motion.button
-          whileTap={{ scale: 1.3 }}
+          whileTap={{ scale: 1.15 }}
           transition={spring}
           onClick={(e) => {
             e.stopPropagation()
             void TaskRepository.toggleDone(task.id, !isDone)
           }}
           aria-label={isDone ? 'Снять отметку' : 'Отметить выполненной'}
-          className="flex h-6 w-6 flex-none items-center justify-center rounded-full border-[2.5px] border-ink text-[13px] font-bold text-white"
-          style={{ background: isDone ? '#1a1a1a' : 'transparent' }}
+          className="flex h-11 w-11 flex-none items-center justify-center"
         >
-          {isDone ? '✓' : ''}
+          <span
+            className={`flex h-6 w-6 items-center justify-center rounded-[8px] border-2 ${
+              isDone ? 'border-accent bg-accent' : 'border-ink/25 bg-transparent'
+            }`}
+          >
+            {isDone && (
+              <motion.svg
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                aria-hidden="true"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1, transition: spring }}
+              >
+                <path
+                  d="M2.5 7.5l3 3 6-7"
+                  fill="none"
+                  stroke="#fff"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </motion.svg>
+            )}
+          </span>
         </motion.button>
 
+        {/* Title — tapping it also toggles done (the biggest target) */}
         <button
-          onClick={(e) => {
-            e.stopPropagation()
-            void TaskRepository.toggleDone(task.id, !isDone)
-          }}
-          className={`min-w-0 flex-1 break-words text-left text-[16px] font-bold text-ink ${
-            isDone ? 'line-through' : ''
+          onClick={() => void TaskRepository.toggleDone(task.id, !isDone)}
+          className={`min-h-11 min-w-0 flex-1 break-words py-2 text-left t-strong ${
+            isDone ? 'text-muted line-through decoration-[1.5px]' : 'text-ink'
           }`}
         >
           {task.title}
         </button>
 
+        {/* Star */}
         <motion.button
-          whileTap={{ scale: 1.35, rotate: 8 }}
+          whileTap={{ scale: 1.2, rotate: 8 }}
           transition={spring}
           onClick={(e) => {
             e.stopPropagation()
             void TaskRepository.toggleImportant(task.id, !isImportant)
           }}
           aria-label={isImportant ? 'Убрать из важного' : 'Пометить важной'}
-          className="flex h-9 w-9 flex-none items-center justify-center"
+          className="flex h-11 w-11 flex-none items-center justify-center"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
             <path
               d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"
-              fill={isImportant ? '#1a1a1a' : 'none'}
-              stroke={isImportant ? '#1a1a1a' : 'rgba(26,26,26,.45)'}
+              fill={isImportant ? '#2f6d4f' : 'none'}
+              stroke={isImportant ? '#2f6d4f' : '#a39b8f'}
               strokeWidth="1.8"
               strokeLinejoin="round"
             />
           </svg>
         </motion.button>
 
+        {/* Delete */}
         <motion.button
           whileTap={tap}
           onClick={(e) => {
@@ -79,9 +104,9 @@ export default function TaskRow({ task, color }: { task: Task; color: string }) 
             setConfirming(true)
           }}
           aria-label="Удалить"
-          className="flex h-9 w-9 flex-none items-center justify-center text-black/35"
+          className="flex h-11 w-11 flex-none items-center justify-center text-faint"
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+          <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
             <path
               d="M5 7h14 M9 7V5h6v2 M7 7l1 13h8l1-13 M10 11v5 M14 11v5"
               fill="none"

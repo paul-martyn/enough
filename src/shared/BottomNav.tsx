@@ -12,7 +12,7 @@ const icons = {
       d="M4 12l4 4 12-12"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2.4"
+      strokeWidth="2.2"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
@@ -65,49 +65,48 @@ const items: Item[] = [
 ]
 
 /**
- * Floating liquid-glass bar (squared corners). The active tab gets a soft
- * colored glow UNDER the glass (layoutId animates it between tabs) plus a
- * springy icon scale.
+ * Floating frost bar. The active tab gets a soft accent-tint pill behind its
+ * icon (layoutId slides it between tabs) and accent-colored icon + label.
  */
 export default function BottomNav() {
   return (
     <nav
       className="pointer-events-none fixed inset-x-0 z-20 flex justify-center px-4"
-      style={{ bottom: 'calc(env(safe-area-inset-bottom) + 6px)' }}
+      style={{ bottom: 'calc(env(safe-area-inset-bottom) + 8px)' }}
     >
-      <div className="glass pointer-events-auto flex w-full max-w-[420px] items-center justify-around rounded-[22px] px-2 py-2.5 shadow-lg shadow-black/10">
+      <div className="frost pointer-events-auto flex w-full max-w-[420px] items-stretch justify-around rounded-bar px-2 py-1.5">
         {items.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             aria-label={item.label}
-            className="relative flex flex-col items-center px-2"
+            className="relative flex min-h-12 flex-1 flex-col items-center justify-center py-1"
           >
             {({ isActive }) => (
               <>
                 {isActive && (
                   <motion.span
-                    layoutId="tab-glow"
+                    layoutId="tab-pill"
                     transition={spring}
                     aria-hidden="true"
-                    className="absolute -top-2 h-16 w-16 rounded-full bg-cta/60 blur-lg"
+                    className="absolute top-0 h-8 w-14 rounded-ctl bg-accent-tint"
                   />
                 )}
                 <motion.span
-                  animate={{ scale: isActive ? 1.2 : 1 }}
-                  whileTap={{ scale: 0.88 }}
+                  animate={{ scale: isActive ? 1.06 : 1 }}
+                  whileTap={{ scale: 0.9 }}
                   transition={spring}
-                  className={`relative flex h-11 w-11 items-center justify-center rounded-2xl ${
-                    isActive ? 'bg-ink text-white' : 'text-black/40'
+                  className={`relative flex h-8 w-14 items-center justify-center ${
+                    isActive ? 'text-accent' : 'text-muted'
                   }`}
                 >
-                  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
                     {item.icon}
                   </svg>
                 </motion.span>
                 <span
                   className={`relative mt-0.5 text-[11px] font-bold leading-tight ${
-                    isActive ? 'text-ink' : 'text-black/40'
+                    isActive ? 'text-accent' : 'text-muted'
                   }`}
                 >
                   {item.label}

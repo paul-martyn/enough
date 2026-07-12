@@ -6,7 +6,7 @@ import { DEFAULT_SETTINGS, type Settings } from './types'
  * (no flash of default look), and they intentionally don't sync across devices.
  *
  * Applied by writing CSS variables the stylesheet reads:
- *   --color-cream (background), --glass-opacity, --glass-blur, --app-scale.
+ *   --app-bg (background), --glass-opacity, --glass-blur, --app-scale.
  */
 const KEY = 'enough.settings.v1'
 
@@ -29,8 +29,6 @@ export function get(): Settings {
 
 export function apply(s: Settings): void {
   const root = document.documentElement
-  // Override the Tailwind theme color so every `bg-cream` follows the choice.
-  root.style.setProperty('--color-cream', s.background)
   root.style.setProperty('--app-bg', s.background)
   root.style.setProperty('--glass-opacity', String(s.glassOpacity))
   root.style.setProperty('--glass-blur', `${s.glassBlur}px`)

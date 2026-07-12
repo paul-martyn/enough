@@ -5,12 +5,36 @@
 @import '@fontsource/manrope/700.css';
 @import '@fontsource/manrope/800.css';
 
-/* Core palette exposed as Tailwind color utilities: bg-cream, text-ink, bg-cta… */
+/*
+ * Design tokens — "warm paper & ink" system.
+ * One accent (fir/sage green) carries progress, checks and active states.
+ * Everything else is warm neutrals. Exposed as Tailwind utilities:
+ * bg-paper, bg-surface, text-ink, text-muted, text-faint, bg-accent,
+ * bg-accent-tint, bg-danger, border-hairline, shadow-e1/e2/e3,
+ * rounded-ctl/card/bar.
+ */
 @theme {
-  --color-cream: #fbf8f2;
-  --color-ink: #1a1a1a;
-  --color-cta: #ff5fa2;
-  --color-done: #f1efe9;
+  --color-paper: #f7f4ee;
+  --color-surface: #ffffff;
+  --color-ink: #241f18;
+  --color-muted: #6b6257;
+  --color-faint: #a39b8f;
+  --color-accent: #2f6d4f;
+  --color-accent-tint: #e5efe7;
+  --color-danger: #c64b3c;
+  --color-danger-tint: #f6e3df;
+  --color-hairline: rgba(36, 31, 24, 0.08);
+
+  /* Radius scale: controls 10, cards 14, floating bars & dialogs 20. */
+  --radius-ctl: 10px;
+  --radius-card: 14px;
+  --radius-bar: 20px;
+
+  /* Warm-tinted elevation instead of glass. */
+  --shadow-e1: 0 1px 2px rgba(60, 50, 35, 0.05);
+  --shadow-e2: 0 8px 24px rgba(60, 50, 35, 0.12);
+  --shadow-e3: 0 16px 48px rgba(60, 50, 35, 0.18);
+
   --font-sans:
     'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
@@ -18,10 +42,52 @@
 /* User-tunable UI variables (overridden at runtime by settingsStore). */
 :root {
   color-scheme: light;
-  --app-bg: #fbf8f2;
-  --glass-opacity: 0.55;
-  --glass-blur: 22px;
+  --app-bg: #f7f4ee;
+  --glass-opacity: 0.85;
+  --glass-blur: 14px;
   --app-scale: 1;
+}
+
+/*
+ * Type scale — 5 steps, Manrope only. Numbers use tabular figures where
+ * they act as data (counters, dates).
+ */
+.t-display {
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.t-title {
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+.t-body {
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+.t-strong {
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+.t-label {
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+.t-caption {
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+.tnum {
+  font-variant-numeric: tabular-nums;
 }
 
 /*
@@ -39,7 +105,7 @@ body {
 
 body {
   background: var(--app-bg);
-  color: #1a1a1a;
+  color: #241f18;
   font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
@@ -56,19 +122,34 @@ body {
   zoom: var(--app-scale);
 }
 
-/* Liquid-glass surface, driven by the settings variables. */
-.glass {
-  background: rgba(255, 255, 255, var(--glass-opacity));
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
-  backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+/*
+ * Frost — the ONLY translucent surface left, used on the two floating bars
+ * (bottom nav + quick-add). Driven by the user's settings variables.
+ */
+.frost {
+  background: rgba(255, 255, 254, var(--glass-opacity));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.3);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.3);
+  border: 1px solid var(--color-hairline);
+  box-shadow: var(--shadow-e2);
 }
 @supports not (
   (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
 ) {
-  .glass {
-    background: rgba(255, 255, 255, 0.92);
+  .frost {
+    background: rgba(255, 255, 254, 0.96);
   }
+}
+
+/* Visible keyboard focus everywhere; pointer clicks stay clean. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Settings sliders follow the accent. */
+input[type='range'] {
+  accent-color: var(--color-accent);
 }
 
 /*
@@ -79,11 +160,11 @@ body {
 @keyframes quick-add-in {
   0% {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(12px);
   }
-  22% {
+  25% {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(12px);
   }
   100% {
     opacity: 1;
@@ -91,7 +172,13 @@ body {
   }
 }
 .quick-add-enter {
-  animation: quick-add-in 0.55s ease-out forwards;
+  animation: quick-add-in 0.45s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quick-add-enter {
+    animation: none;
+  }
 }
 
 /* Hide scrollbars — the design keeps surfaces clean. */

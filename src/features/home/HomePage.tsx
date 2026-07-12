@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { TaskRepository } from '../tasks/TaskRepository'
@@ -8,13 +7,13 @@ import { useCategories } from '../categories/useCategories'
 import { DEFAULT_CATEGORY_ID } from '../categories/types'
 import { categoryColor } from '../../shared/theme'
 import { useSettings } from '../settings/useSettings'
+import { Card, EmptyState, Eyebrow, QuickAddBar } from '../../shared/ui'
 import { tap } from '../../shared/motion'
 
 export default function HomePage() {
   const tasks = useTasks()
   const categories = useCategories()
   const { settings } = useSettings()
-  const [quick, setQuick] = useState('')
 
   const loading = !tasks || !categories
   const colorOf = (categoryId: string) => {
@@ -22,23 +21,16 @@ export default function HomePage() {
     return categoryColor(idx < 0 ? 0 : idx)
   }
 
-  async function submitQuick(e: React.FormEvent) {
-    e.preventDefault()
-    const title = quick.trim()
-    if (!title) return
-    await TaskRepository.add({ title, categoryId: DEFAULT_CATEGORY_ID })
-    setQuick('')
-  }
-
-  const todayLabelRaw = new Date().toLocaleDateString('ru-RU', {
+  const todayLabel = new Date().toLocaleDateString('ru-RU', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
   })
-  const todayLabel = todayLabelRaw.charAt(0).toUpperCase() + todayLabelRaw.slice(1)
 
-  const doneToday = tasks?.filter((t) => t.done === 1).length ?? 0
+  const done = tasks?.filter((t) => t.done === 1).length ?? 0
   const total = tasks?.length ?? 0
+  const left = total - done
+  const progress = total > 0 ? (done / total) * 100 : 0
   const important = (tasks ?? [])
     .filter((t) => t.done === 0 && t.important === 1)
     .slice(0, 5)
@@ -47,28 +39,26 @@ export default function HomePage() {
 
   return (
     <div
-      className="mx-auto flex w-full max-w-[640px] flex-col gap-7 px-6"
+      className="mx-auto flex w-full max-w-[640px] flex-col gap-8 px-5"
       style={{
-        paddingTop: 'calc(env(safe-area-inset-top) + 28px)',
+        paddingTop: 'calc(env(safe-area-inset-top) + 24px)',
         paddingBottom: 'calc(env(safe-area-inset-bottom) + 130px)',
       }}
     >
-      {/* Header: vault name + date, settings gear, avatar */}
-      <div className="flex items-center justify-between">
+      {/* Header: date + vault name, settings gear, avatar */}
+      <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <div className="truncate text-[30px] font-extrabold leading-tight text-ink">
-            {name}
-          </div>
-          <div className="mt-1 text-[15px] font-medium text-black/45">{todayLabel}</div>
+          <div className="t-caption text-muted">{todayLabel}</div>
+          <h1 className="mt-1 truncate t-display text-ink">{name}</h1>
         </div>
-        <div className="flex flex-none items-center gap-2.5">
+        <div className="flex flex-none items-center gap-2">
           <motion.span whileTap={tap} className="inline-flex">
             <Link
               to="/settings"
               aria-label="Настройки"
-              className="flex h-12 w-12 items-center justify-center rounded-2xl bg-black/5 text-ink"
+              className="flex h-11 w-11 items-center justify-center rounded-ctl text-muted hover:bg-black/[.04]"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
                 <path
                   d="M12 15.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z M19.4 13a7.6 7.6 0 000-2l2-1.5-2-3.5-2.4 1a7.6 7.6 0 00-1.7-1l-.4-2.5h-4l-.4 2.5a7.6 7.6 0 00-1.7 1l-2.4-1-2 3.5L4.6 11a7.6 7.6 0 000 2l-2 1.5 2 3.5 2.4-1a7.6 7.6 0 001.7 1l.4 2.5h4l.4-2.5a7.6 7.6 0 001.7-1l2.4 1 2-3.5-2-1.5z"
                   fill="none"
@@ -85,10 +75,10 @@ export default function HomePage() {
                 <img
                   src={settings.avatarDataUrl}
                   alt=""
-                  className="h-14 w-14 rounded-full object-cover"
+                  className="h-12 w-12 rounded-full border border-hairline object-cover"
                 />
               ) : (
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#ffd23f] text-2xl font-extrabold text-ink">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-tint t-title text-accent">
                   {name.charAt(0).toUpperCase()}
                 </span>
               )}
@@ -97,41 +87,51 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Quick add */}
-      <form
-        onSubmit={submitQuick}
-        className="flex items-center gap-3 rounded-[22px] bg-ink px-5 py-4"
-      >
-        <input
-          value={quick}
-          onChange={(e) => setQuick(e.target.value)}
-          placeholder="Быстро добавить задачу…"
-          className="min-w-0 flex-1 border-none bg-transparent text-[16px] font-semibold text-white placeholder:text-white/50 focus:outline-none"
-        />
-        <motion.button
-          whileTap={tap}
-          type="submit"
-          aria-label="Добавить"
-          className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-cta text-2xl font-extrabold text-ink"
-        >
-          +
-        </motion.button>
-      </form>
+      {/* Quick add — same bar as on Tasks, in its card form */}
+      <QuickAddBar
+        placeholder="Быстро добавить задачу…"
+        onSubmit={(title) =>
+          void TaskRepository.add({ title, categoryId: DEFAULT_CATEGORY_ID })
+        }
+        className="border border-hairline bg-surface shadow-e1"
+      />
 
-      {/* Stats */}
-      <div className="rounded-2xl bg-[#8ee6b0] p-5">
-        <div className="text-[32px] font-bold leading-none text-ink">
-          {loading ? '—' : `${doneToday}/${total}`}
+      {/* Signature: the day at a glance */}
+      <Card className="p-5">
+        <Eyebrow>Сегодня</Eyebrow>
+        <div className="flex items-baseline gap-1.5">
+          <span className="tnum text-[32px] font-extrabold leading-none tracking-[-0.02em] text-ink">
+            {loading ? '—' : done}
+          </span>
+          <span className="tnum text-[17px] font-bold text-faint">
+            / {loading ? '—' : total}
+          </span>
         </div>
-        <div className="mt-2 text-[13px] font-semibold text-black/60">
-          Сегодня выполнено
+        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-black/[.06]">
+          <div
+            className="h-full rounded-full bg-accent transition-[width] duration-500 ease-out"
+            style={{ width: `${progress}%` }}
+          />
         </div>
-      </div>
+        <div className="mt-3 t-body font-medium">
+          {loading ? (
+            <span className="text-muted">…</span>
+          ) : total === 0 ? (
+            <span className="text-muted">Задач пока нет — добавьте первую.</span>
+          ) : left > 0 ? (
+            <span className="text-muted">
+              Осталось {left} {taskWord(left)}
+            </span>
+          ) : (
+            <span className="font-bold text-accent">на сегодня — достаточно.</span>
+          )}
+        </div>
+      </Card>
 
       {/* Important (starred) tasks */}
-      <div>
-        <div className="mb-3 text-[17px] font-bold text-ink">Важное</div>
-        <div className="flex flex-col gap-2.5">
+      <section>
+        <Eyebrow>Важное</Eyebrow>
+        <div className="flex flex-col gap-2">
           {important.map((t) => (
             <motion.div
               key={t.id}
@@ -143,12 +143,20 @@ export default function HomePage() {
             </motion.div>
           ))}
           {!loading && important.length === 0 && (
-            <div className="rounded-2xl bg-black/[.04] px-5 py-5 text-[14px] font-semibold leading-snug text-black/40">
-              Отмечай задачи звёздочкой ⭐ — они появятся здесь.
-            </div>
+            <EmptyState>
+              Отмечайте задачи звёздочкой — самое важное соберётся здесь.
+            </EmptyState>
           )}
         </div>
-      </div>
+      </section>
     </div>
   )
+}
+
+function taskWord(n: number): string {
+  const mod10 = n % 10
+  const mod100 = n % 100
+  if (mod10 === 1 && mod100 !== 11) return 'задача'
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'задачи'
+  return 'задач'
 }

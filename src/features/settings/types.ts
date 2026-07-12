@@ -14,12 +14,12 @@ export interface Settings {
 }
 
 export const BACKGROUND_PRESETS: ReadonlyArray<{ name: string; value: string }> = [
-  { name: 'Кремовый', value: '#fbf8f2' },
+  { name: 'Бумага', value: '#f7f4ee' },
   { name: 'Белый', value: '#ffffff' },
-  { name: 'Мятный', value: '#eef6f0' },
-  { name: 'Персиковый', value: '#fdf0ea' },
-  { name: 'Голубой', value: '#eef1fb' },
-  { name: 'Сиреневый', value: '#f3eefb' },
+  { name: 'Лён', value: '#f3efe6' },
+  { name: 'Шалфей', value: '#eef3ec' },
+  { name: 'Небо', value: '#edf1f5' },
+  { name: 'Лаванда', value: '#f0edf5' },
 ]
 
 export const LIMITS = {
@@ -29,9 +29,9 @@ export const LIMITS = {
 } as const
 
 export const DEFAULT_SETTINGS: Settings = {
-  background: '#fbf8f2',
-  glassOpacity: 0.55,
-  glassBlur: 22,
+  background: '#f7f4ee',
+  glassOpacity: 0.85,
+  glassBlur: 14,
   scale: 1,
   assistantName: 'enough',
   avatarDataUrl: null,
